@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Playlist</title>
+
+  <!-- Main Stylesheet -->
+  <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+
+  <!-- Dynamic mood CSS -->
+  <link id="themeCSS" rel="stylesheet" href="{{ url_for('static', filename='css/happy.css') }}">
+
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+
+  <style>
+    
+    /* Main playlist styling */
+    #songsList {
+        margin-top: 25px;
+    }
+
+    .song-card {
+        background: rgba(255, 255, 255, 0.12);
+        border: 1px solid rgba(39, 37, 37, 0.2);
+        backdrop-filter: blur(10px);
+        padding: 18px 22px;
+        border-radius: 16px;
+        margin-bottom: 18px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        transition: transform 0.15s ease, box-shadow 0.2s ease;
+    }
+
+    /* Hover effect */
+    .song-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.35);
+    }
+
+    /* Song title */
+    .song-title {
+        font-size: 19px;
+        font-weight: 700;
+        color: #0c0101;
+    }
+
+    /* Artist name */
+    .song-artist {
+        font-size: 13px;
+        color: #0c0101;
+        opacity: 0.9;
+    }
+
+    /* Play button */
+    .play-btn {
+        padding: 8px 16px;
+        border-radius: 12px;
+        font-weight: 600;
+        background: #ffffff;
+        color: #000;
+        border: none;
+        transition: background 0.2s ease, transform 0.2s ease;
+    }
+
+    .play-btn:hover {
+        background: #c7ff17;
+        transform: scale(1.07);
+    }
+    
+</style>
+
+    
+
+
+</head>
+
+<body>
+
+<nav class="navbar navbar-dark bg-dark">
+  <div class="container">
+    <a class="navbar-brand fw-bold" href="/">MoodTune</a>
+  </div>
+</nav>
+
+<div class="container">
+
+  <!-- Hero -->
+  <div class="p-5 mt-4 text-center text-white" style="
+      background: linear-gradient(135deg, #743ad5 0%, #d53a9d 100%);
+      backdrop-filter: blur(10px);
+      border-radius: 18px;">
+    <h1 id="pageTitle" class="fw-bold">Loading Playlist...</h1>
+    <p id="pageSub"></p>
+  </div>
+
+  <div class="text-center mt-4">
+  <a id="randomBtn" class="btn btn-outline-dark fw-bold px-4 py-2" 
+     style="border-radius: 14px; font-size: 18px;">
+     🔀 Play Random Song
+  </a>
+</div>
+
+
+  <div id="songsList" class="mt-4"></div>
+
+</div>
+
+<!-- Footer Player -->
+<footer id="playerFooter" class="fixed-bottom bg-dark text-white p-3 d-none">
+  <div class="container d-flex justify-content-between align-items-center">
+    <div>
+      <strong id="nowPlayingTitle"></strong><br>
+      <span id="nowPlayingArtist" style="font-size: 13px;"></span>
+    </div>
+
+    <audio id="audioPlayer" controls style="width: 300px;"></audio>
+  </div>
+</footer>
+
+
+<script>
+const params = new URLSearchParams(window.location.search);
+const mood = params.get("mood");
+const lang = params.get("lang");
+
+document.getElementById("themeCSS").href = `/static/css/${mood}.css`;
+
+document.getElementById("pageTitle").innerText =
+  `${mood.charAt(0).toUpperCase() + mood.slice(1)} • ${lang.toUpperCase()} Playlist`;
+
+document.getElementById("pageSub").innerText = `Showing songs for ${mood} mood.`;
+
+
+
+
+
+// Fetch songs
+async function loadSongs() {
+  const res = await fetch(`/api/songs?mood=${mood}&language=${lang}`);
+  const songs = await res.json();
+  renderSongs(songs);
+}
+
+function renderSongs(songs) {
+  const div = document.getElementById("songsList");
+  div.innerHTML = "";
+
+  if (songs.length === 0) {
+    div.innerHTML = `<p class="text-white">No songs found.</p>`;
+    return;
+  }
+
+  songs.forEach(song => {
+    const item = document.createElement("div");
+    item.className = "song-card";
+
+    item.innerHTML = `
+      <div>
+        <div class="song-title">${song.title}</div>
+        <div class="song-artist">${song.artist}</div>
+      </div>
+
+      <button class="play-btn">Play</button>
+    `;
+
+    item.querySelector("button").onclick = () => play(song);
+
+    div.appendChild(item);
+  });
+}
+
+function play(song) {
+  const footer = document.getElementById("playerFooter");
+  footer.classList.remove("d-none");
+
+  document.getElementById("nowPlayingTitle").innerText = song.title;
+  document.getElementById("nowPlayingArtist").innerText = song.artist;
+
+  const audio = document.getElementById("audioPlayer");
+
+  if (song.preview_url) {
+    audio.src = song.preview_url;
+    audio.play();
+  } else {
+    window.open(song.external_url, "_blank");
+  }
+}
+
+loadSongs();
+</script>
+<script>
+  // Set random button link based on mood + language
+  const randomBtn = document.getElementById("randomBtn");
+  randomBtn.href = `/play?mood=${mood}&language=${lang}&random=true`;
+</script>
+
+</body>
+</html>
