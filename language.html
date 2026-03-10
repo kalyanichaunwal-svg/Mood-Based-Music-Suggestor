@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Select Language</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <!-- Load main CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+
+    <style>
+        body {
+            color: #fff;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        .language-box {
+            background: linear-gradient(135deg, #743ad5 0%, #d53a9d 100%);
+            padding: 40px;
+            border-radius: 18px;
+            margin-top: 100px;
+            backdrop-filter: blur(6px);
+            box-shadow: 0 8px 40px rgba(241, 234, 234, 0.4);
+            text-align: justify;
+        }
+        .btn-lang {
+            padding: 14px;
+            font-size: 16px;
+            font-weight: 600;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            border: black;
+            background-color: aliceblue;
+            color: black;
+            transform: scale(1.5);
+        }
+        #back{
+            background-color: aliceblue;
+            color: black;
+            font-size: 16px;
+            transform: scale(1.5);
+            padding: 12px;
+        }
+
+    </style>
+</head>
+
+<body>
+
+<div class="container d-flex justify-content-center">
+    <div class="col-md-6 language-box">
+
+        <h3 class="mb-3 fw-bold">CHOOSE YOUR LANGUAGE</h3>
+        <h3 id="moodLine" class="mb-4"></h3>
+
+        <!-- Buttons -->
+         
+        <a id="hindiBtn" class="btn btn-light btn-lang w-100">Hindi</a>
+        <a id="englishBtn" class="btn btn-light btn-lang w-100">English</a>
+
+        <a href="/" class="btn btn-outline-light mt-4" id="back">← Back</a>
+        
+   </div>
+</div>
+
+<script>
+    // Extract mood from URL
+    const params = new URLSearchParams(window.location.search);
+    const mood = params.get("mood") || "happy";
+
+    document.getElementById("moodLine").innerText =
+        `You selected the "${mood}" mood.`;
+
+    // Set navigation to playlist page
+    document.getElementById("hindiBtn").href =
+        `/playlist?mood=${mood}&lang=hindi`;
+
+    document.getElementById("englishBtn").href =
+        `/playlist?mood=${mood}&lang=english`;
+</script>
+
+</body>
+</html>
